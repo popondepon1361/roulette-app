@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>37-Ball European Roulette - The Entertainer (Slower Full Song)</title>
+    <style>
+        body {
+            background-color: #0b3d1b;
+            color: #ffffff;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .top-bar {
+            width: 100%;
+            max-width: 650px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .ai-badge {
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 12px;
+            color: #000;
+            font-size: 13px;
+            animation: flashColors 2.5s infinite linear;
+            box-shadow: 0 0 8px rgba(255,255,255,0.4);
+        }
+
+        @keyframes flashColors {
+            0%, 100% { background-color: #f1c40f; }
+            33%      { background-color: #2ecc71; }
+            66%      { background-color: #3498db; }
+        }
+
+        .visit-counter {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 4px 10px;
+            border-radius: 12px;
+            border: 1px solid #d4af37;
+            font-size: 12px;
+        }
+
+        .controls-top {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        select, .bgm-btn {
+            background: #1e272e;
+            color: #fff;
+            border: 1px solid #d4af37;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        h1 {
+            font-size: clamp(18px, 4vw, 24px);
+            margin: 5px 0 10px 0;
+            text-shadow: 1px 1px 3px #000;
+            text-align: center;
+        }
+
+        #canvas-container {
+            position: relative;
+            width: 100%;
+            max-width: 550px;
+            aspect-ratio: 1 / 1;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            border-radius: 50%;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            border-radius: 50%;
+        }
+
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 550px;
+        }
+
+        .spin-button {
+            padding: 12px 28px;
+            font-size: clamp(15px, 3.5vw, 18px);
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(135deg, #d4af37, #aa7c11);
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 80%;
+            max-width: 320px;
+        }
+
+        .spin-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.5);
+        }
+
+        .spin-button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #status {
+            font-size: 14px;
+            min-height: 20px;
+            color: #f1c40f;
+            text-align: center;
+        }
+
+        .mascot-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #2ecc71;
+            border-radius: 15px;
+            padding: 10px 15px;
+            margin-top: 10px;
+            width: 90%;
+            max-width: 520px;
+            box-sizing: border-box;
+        }
+
+        .mascot-avatar {
+            width: 50px;
+            height: 50px;
+            background: #2ecc71;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .mascot-bubble {
+            font-size: 13px;
+            color: #ffffff;
+            line-height: 1.4;
+        }
+
+        .disclaimer-footer {
+            margin-top: 15px;
+            font-size: 11px;
+            color: #bdc3c7;
+            text-align: center;
+            max-width: 550px;
+            line-height: 1.3;
+            opacity: 0.85;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="ai-badge">Made by AI</div>
+        <div class="visit-counter" id="visitCounter">Visits: 1</div>
+        <div class="controls-top">
+            <button class="bgm-btn" id="bgmBtn">🎵 BGM: OFF</button>
+            <select id="langSelect">
+                <option value="ja">日本語</option>
+                <option value="en" selected>English</option>
+                <option value="zh">中文</option>
+                <option value="ko">한국어</option>
+                <option value="it">Italiano</option>
+                <option value="fr">Français</option>
+                <option value="ar">العربية</option>
+                <option value="hi">हिन्दी</option>
+                <option value="ru">Русский</option>
+            </select>
+        </div>
+    </div>
+
+    <h1 id="appTitle">37-Ball European Roulette</h1>
+
+    <div id="canvas-container">
+        <canvas id="roulette" width="600" height="600"></canvas>
+    </div>
+
+    <div class="controls">
+        <button id="spinBtn" class="spin-button">Spin All 37 Balls!</button>
+        <div id="status">Press the button to start</div>
+    </div>
+
+    <div class="mascot-container">
+        <div class="mascot-avatar">🟢</div>
+        <div class="mascot-bubble" id="mascotSpeech">Hello! I am your AI assistant. Let's spin all 37 balls together!</div>
+    </div>
+
+    <div class="disclaimer-footer">
+        Please bear in mind that the evaluation is performed by AI, so there may be some shortcomings.
+    </div>
+
+<script>
+// ==========================================
+// 1. Multilingual Translation Dictionary
+// ==========================================
+const TRANSLATIONS = {
+    ja: {
+        title: "37玉 全マス着地 ヨーロピアンルーレット",
+        spinBtn: "37個の玉を投球！",
+        statusInit: "ボタンを押してスタートしてください",
+        statusSpinning: "37個の玉とルーレットが激しく回転中...",
+        statusDone: "全37マスに重複なく1個ずつ球が停止しました！",
+        visitPrefix: "訪問者数: ",
+        mascotGreeting: "なのだ！37個の玉を投球してみるのだ！",
+        mascotSpinning: "ルーレットが激しく回っているのだ！どこに入るか楽しみなのだ！",
+        mascotDone: "見事なのだ！全37マスにぴったり1個ずつ納まったのだ！",
+        speechLang: "ja-JP"
+    },
+    en: {
+        title: "37-Ball European Roulette",
+        spinBtn: "Spin All 37 Balls!",
+        statusInit: "Press the button to start",
+        statusSpinning: "37 balls and wheel are spinning dynamically...",
+        statusDone: "All 37 balls landed perfectly in every single pocket!",
+        visitPrefix: "Visits: ",
+        mascotGreeting: "Hello! Let's spin all 37 balls together!",
+        mascotSpinning: "Spinning fast! Where will they land?",
+        mascotDone: "Awesome! Every single pocket has exactly one ball!",
+        speechLang: "en-US"
+    },
+    zh: {
+        title: "37球全中 欧式轮盘",
+        spinBtn: "发射37个球！",
+        statusInit: "请点击按钮开始",
+        statusSpinning: "轮盘正在快速旋转...",
+        statusDone: "所有37个球已完美停在每个槽中！",
+        visitPrefix: "访问次数: ",
+        mascotGreeting: "你好！让我们一起旋转37个球吧！",
+        mascotSpinning: "正在快速旋转！看看它们会停在哪里！",
+        mascotDone: "太棒了！每个槽里都刚好停了一个球！",
+        speechLang: "zh-CN"
+    },
+    ko: {
+        title: "37구 완벽 착지 룰レット",
+        spinBtn: "37개 공 투구!",
+        statusInit: "버튼을 눌러 시작하세요",
+        statusSpinning: "룰렛이 빠르게 회전 중입니다...",
+        statusDone: "모든 37개 포켓에 1개씩 공이 정지했습니다!",
+        visitPrefix: "방문자 수: ",
+        mascotGreeting: "안녕하세요! 37개의 공을 모두 돌려봅시다!",
+        mascotSpinning: "빠르게 돌고 있습니다! 어디로 들어갈까요?",
+        mascotDone: "대단합니다! 모든 포켓에 하나씩 딱 들어갔습니다!",
+        speechLang: "ko-KR"
+    },
+    it: {
+        title: "Roulette Europea a 37 Palline",
+        spinBtn: "Lancia le 37 palline!",
+        statusInit: "Premi il pulsante per iniziare",
+        statusSpinning: "La ruota sta girando velocemente...",
+        statusDone: "Tutte le 37 palline sono atterrate in ogni casella!",
+        visitPrefix: "Visite: ",
+        mascotGreeting: "Ciao! Lanciamo insieme tutte le 37 palline!",
+        mascotSpinning: "Sta girando velocemente! Dove andranno a finire?",
+        mascotDone: "Fantastico! Ogni casella ha esattamente una pallina!",
+        speechLang: "it-IT"
+    },
+    fr: {
+        title: "Roulette Européenne à 37 Billes",
+        spinBtn: "Lancer les 37 billes !",
+        statusInit: "Appuyez sur le bouton pour commencer",
+        statusSpinning: "La roulette tourne rapidement...",
+        statusDone: "Toutes les 37 billes sont parfaitement arrêtées dans chaque case !",
+        visitPrefix: "Visites : ",
+        mascotGreeting: "Bonjour ! Lançons les 37 billes ensemble !",
+        mascotSpinning: "Ça tourne vite ! Où vont-elles s'arrêter ?",
+        mascotDone: "Magnifique ! Chaque case contient exactement une bille !",
+        speechLang: "fr-FR"
+    },
+    ar: {
+        title: "روليت أوروبية بـ 37 كرة",
+        spinBtn: "إطلاق 37 كرة!",
+        statusInit: "اضغط على الزر للبدء",
+        statusSpinning: "العجلة تدور بسرعة الآن...",
+        statusDone: "استقرت جميع الكرات الـ 37 في كل الجيوب بنجاح!",
+        visitPrefix: "الزيارات: ",
+        mascotGreeting: "مرحباً! لنطلق جميع الكرات الـ 37 معاً!",
+        mascotSpinning: "إنها تدور بسرعة! أين ستستقر يا ترى؟",
+        mascotDone: "رائع جداً! استقرت كرة واحدة بالضبط في كل جيب!",
+        speechLang: "ar-SA"
+    },
+    hi: {
+        title: "37-बॉल यूरोपीय रूलेट",
+        spinBtn: "सभी 37 गेंदें घुमाएं!",
+        statusInit: "शुरू करने के लिए बटन दबाएं",
+        statusSpinning: "पहिया तेज़ी से घूम रहा है...",
+        statusDone: "सभी 37 गेंदें हर एक पॉकेट में पूरी तरह रुक गईं!",
+        visitPrefix: "विज़िट: ",
+        mascotGreeting: "नमस्ते! आइए सभी 37 गेंदों को एक साथ घुमाएं!",
+        mascotSpinning: "तेज़ी से घूम रहा है! देखें वे कहां रुकती हैं!",
+        mascotDone: "अद्भुत! हर एक पॉकेट में ठीक एक गेंद है!",
+        speechLang: "hi-IN"
+    },
+    ru: {
+        title: "Европейская рулетка на 37 шаров",
+        spinBtn: "Запустить 37 шаров!",
+        statusInit: "Нажмите кнопку, чтобы начать",
+        statusSpinning: "Колесо быстро вращается...",
+        statusDone: "Все 37 шаров остановились в каждом лузе без совпадений!",
+        visitPrefix: "Визиты: ",
+        mascotGreeting: "Привет! Давайте запустим все 37 шаров вместе!",
+        mascotSpinning: "Быстро вращается! Где же они остановятся?",
+        mascotDone: "Отлично! В каждой лузе ровно по одному шару!",
+        speechLang: "ru-RU"
+    }
+};
+
+let currentLang = 'en';
+
+// ==========================================
+// 2. LocalStorage Visit Counter
+// ==========================================
+let visits = parseInt(localStorage.getItem('roulette_visit_count') || '0', 10) + 1;
+localStorage.setItem('roulette_visit_count', visits.toString());
+
+function updateVisitCountDisplay() {
+    const prefix = TRANSLATIONS[currentLang].visitPrefix;
+    document.getElementById('visitCounter').textContent = prefix + visits;
+}
+
+// ==========================================
+// 3. Web Audio API Full Arrangement: "The Entertainer" (Gentle / Relaxed Tempo)
+// ==========================================
+let audioCtx = null;
+let bgmTimer = null;
+let isBgmOn = false;
+
+const N = {
+    C4: 261.63, D4: 293.66, DS4: 311.13, E4: 329.63, F4: 349.23, FS4: 369.99, G4: 392.00, GS4: 415.30, A4: 440.00, AS4: 466.16, B4: 493.88,
+    C5: 523.25, CS5: 554.37, D5: 587.33, DS5: 622.25, E5: 659.25, F5: 698.46, FS5: 739.99, G5: 783.99, A5: 880.00
+};
+
+// Full arrangement with relaxed moderate tempo (~145ms base duration)
+const entertainerFullMelody = [
+    // --- INTRO ---
+    [N.D4, 145], [N.DS4, 145], [N.E4, 145], [N.C5, 290],
+    [N.E4, 145], [N.C5, 290], [N.E4, 145], [N.C5, 580],
+    [N.C5, 145], [N.D5, 145], [N.DS5, 145], [N.E5, 145],
+    [N.C5, 145], [N.D5, 145], [N.E5, 290], [N.B4, 145],
+    [N.D5, 290], [N.C5, 580],
+
+    // --- MAIN THEME A ---
+    [N.D4, 145], [N.DS4, 145], [N.E4, 145], [N.C5, 290],
+    [N.E4, 145], [N.C5, 290], [N.E4, 145], [N.C5, 435],
+    [N.A4, 145], [N.G4, 145], [N.FS4, 145], [N.A4, 145],
+    [N.C5, 145], [N.E5, 290], [N.D5, 145], [N.C5, 145],
+    [N.D5, 580],
+    
+    [N.D4, 145], [N.DS4, 145], [N.E4, 145], [N.C5, 290],
+    [N.E4, 145], [N.C5, 290], [N.E4, 145], [N.C5, 435],
+    [N.C5, 145], [N.D5, 145], [N.E5, 145], [N.C5, 145],
+    [N.D5, 145], [N.E5, 290], [N.C5, 145], [N.D5, 145],
+    [N.C5, 580],
+
+    // --- MAIN THEME B ---
+    [N.C5, 145], [N.D5, 145], [N.E5, 290], [N.C5, 145],
+    [N.D5, 145], [N.E5, 290], [N.C5, 145], [N.D5, 145],
+    [N.E5, 145], [N.F5, 145], [N.F5, 145], [N.E5, 145],
+    [N.D5, 145], [N.F5, 145], [N.E5, 290], [N.C5, 145],
+    [N.D5, 145], [N.E5, 580],
+
+    [N.D4, 145], [N.DS4, 145], [N.E4, 145], [N.C5, 290],
+    [N.E4, 145], [N.C5, 290], [N.E4, 145], [N.C5, 435],
+    [N.A4, 145], [N.G4, 145], [N.FS4, 145], [N.A4, 145],
+    [N.C5, 145], [N.E5, 290], [N.D5, 145], [N.C5, 145],
+    [N.C5, 580],
+
+    // --- CODA / ENDING ---
+    [N.C5, 145], [N.E5, 145], [N.G5, 290], [N.G5, 290],
+    [N.A5, 290], [N.G5, 290], [N.E5, 290], [N.C5, 290],
+    [N.D5, 290], [N.C5, 800]
+];
+
+let melodyIndex = 0;
+
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+}
+
+function toggleBGM() {
+    initAudio();
+    const btn = document.getElementById('bgmBtn');
+    isBgmOn = !isBgmOn;
+
+    if (isBgmOn) {
+        btn.textContent = "🎵 BGM: ON";
+        playEntertainerBGM();
+    } else {
+        btn.textContent = "🎵 BGM: OFF";
+        stopEntertainerBGM();
+    }
+}
+
+function playEntertainerBGM() {
+    if (!audioCtx || !isBgmOn) return;
+
+    try {
+        const item = entertainerFullMelody[melodyIndex];
+        const freq = item[0];
+        const duration = item[1];
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (duration / 1000));
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + (duration / 1000));
+
+        melodyIndex = (melodyIndex + 1) % entertainerFullMelody.length;
+        bgmTimer = setTimeout(playEntertainerBGM, duration);
+    } catch (e) {
+        // Fallback
+    }
+}
+
+function stopEntertainerBGM() {
+    if (bgmTimer) {
+        clearTimeout(bgmTimer);
+        bgmTimer = null;
+    }
+}
+
+function playClickSFX() {
+    if (!audioCtx) return;
+    try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.05);
+
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.05);
+    } catch (e) {
+        // Fallback
+    }
+}
+
+// ==========================================
+// 4. Text-To-Speech for Mascot
+// ==========================================
+function speakMascotText(text) {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const speech = new SpeechSynthesisUtterance(text);
+        speech.lang = TRANSLATIONS[currentLang].speechLang;
+        speech.rate = 1.0;
+        speech.pitch = 1.2;
+        window.speechSynthesis.speak(speech);
+    }
+}
+
+function updateMascotMessage(key) {
+    const msg = TRANSLATIONS[currentLang][key];
+    document.getElementById('mascotSpeech').textContent = msg;
+    speakMascotText(msg);
+}
+
+// ==========================================
+// 5. European Roulette Core Logic
+// ==========================================
+const POCKETS = [
+    0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10,
+    5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26
+];
+
+const RED_NUMBERS = new Set([1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]);
+
+const canvas = document.getElementById('roulette');
+const ctx = canvas.getContext('2d');
+const spinBtn = document.getElementById('spinBtn');
+const statusDiv = document.getElementById('status');
+const langSelect = document.getElementById('langSelect');
+const bgmBtn = document.getElementById('bgmBtn');
+
+const centerX = canvas.width / 2;
+const centerY = canvas.height / 2;
+const outerRadius = 270;
+const innerRadius = 150;
+const centerRadius = 85;
+
+const ballTargetRadius = 225;
+const numberRadius = 180;
+const ballRadius = 5.5;
+
+let wheelAngle = 0;
+let wheelSpeed = 0;
+let isSpinning = false;
+let balls = [];
+
+class Ball {
+    constructor(targetIndex, delayFrames) {
+        this.targetIndex = targetIndex;
+        this.delay = delayFrames;
+        this.active = false;
+        
+        this.currentRadius = outerRadius + 15 + Math.random() * 10;
+        this.angle = Math.random() * Math.PI * 2;
+        this.speed = 0.28 + Math.random() * 0.08; 
+        
+        this.state = 'waiting';
+        this.dropProgress = 0;
+        this.playedSound = false;
+    }
+
+    update(currentWheelAngle) {
+        if (this.delay > 0) {
+            this.delay--;
+            return;
+        }
+        this.active = true;
+
+        if (this.state === 'waiting') {
+            this.state = 'outer';
+        }
+
+        const pocketAngleWidth = (Math.PI * 2) / 37;
+        const targetAngle = currentWheelAngle + (this.targetIndex + 0.5) * pocketAngleWidth;
+
+        if (this.state === 'outer') {
+            this.angle -= this.speed;
+            this.speed *= 0.9968;
+
+            if (this.speed < 0.012) {
+                this.state = 'dropping';
+            }
+        } 
+        else if (this.state === 'dropping') {
+            this.dropProgress += 0.009;
+
+            const angleDiff = Math.atan2(Math.sin(targetAngle - this.angle), Math.cos(targetAngle - this.angle));
+            this.angle += angleDiff * 0.08;
+
+            this.currentRadius = outerRadius - (outerRadius - ballTargetRadius) * Math.min(1, this.dropProgress);
+
+            if (this.dropProgress >= 1) {
+                this.state = 'locked';
+                if (!this.playedSound) {
+                    playClickSFX();
+                    this.playedSound = true;
+                }
+            }
+        } 
+        else if (this.state === 'locked') {
+            this.angle = targetAngle;
+            this.currentRadius = ballTargetRadius;
+        }
+    }
+
+    draw() {
+        if (!this.active) return;
+
+        const bx = centerX + Math.cos(this.angle) * this.currentRadius;
+        const by = centerY + Math.sin(this.angle) * this.currentRadius;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(bx, by, ballRadius, 0, Math.PI * 2);
+        
+        const grad = ctx.createRadialGradient(bx - 2, by - 2, 1, bx, by, ballRadius);
+        grad.addColorStop(0, '#ffffff');
+        grad.addColorStop(0.5, '#e0e0e0');
+        grad.addColorStop(1, '#888888');
+        
+        ctx.fillStyle = grad;
+        ctx.shadowColor = 'rgba(0,0,0,0.4)';
+        ctx.shadowBlur = 3;
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 1;
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+function drawWheel() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const numPockets = POCKETS.length;
+    const arcSize = (Math.PI * 2) / numPockets;
+
+    // Outer rim
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, outerRadius + 20, 0, Math.PI * 2);
+    ctx.fillStyle = '#4a2511';
+    ctx.fill();
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#d4af37';
+    ctx.stroke();
+    ctx.restore();
+
+    // Pockets
+    for (let i = 0; i < numPockets; i++) {
+        const angle = wheelAngle + i * arcSize;
+        const num = POCKETS[i];
+
+        let color = '#008000';
+        if (RED_NUMBERS.has(num)) {
+            color = '#d00000';
+        } else if (num !== 0) {
+            color = '#111111';
+        }
+
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, outerRadius, angle, angle + arcSize);
+        ctx.arc(centerX, centerY, innerRadius, angle + arcSize, angle, true);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(angle + arcSize / 2);
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillText(num.toString(), numberRadius, 0);
+        ctx.restore();
+    }
+
+    // Inner green track
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
+    ctx.fillStyle = '#0b3d1b';
+    ctx.fill();
+
+    // Balls
+    let lockedCount = 0;
+    balls.forEach(ball => {
+        if (isSpinning) {
+            ball.update(wheelAngle);
+        }
+        ball.draw();
+        if (ball.state === 'locked') {
+            lockedCount++;
+        }
+    });
+
+    // Dividers
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = '#d4af37';
+    for (let i = 0; i < numPockets; i++) {
+        const angle = wheelAngle + i * arcSize;
+        ctx.beginPath();
+        ctx.moveTo(centerX + Math.cos(angle) * innerRadius, centerY + Math.sin(angle) * innerRadius);
+        ctx.lineTo(centerX + Math.cos(angle) * outerRadius, centerY + Math.sin(angle) * outerRadius);
+        ctx.stroke();
+    }
+
+    // Concentric rings
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, outerRadius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Metallic hub
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, centerRadius, 0, Math.PI * 2);
+    const centerGrad = ctx.createRadialGradient(centerX, centerY, 10, centerX, centerY, centerRadius);
+    centerGrad.addColorStop(0, '#ffe066');
+    centerGrad.addColorStop(0.7, '#d4af37');
+    centerGrad.addColorStop(1, '#8a640f');
+    ctx.fillStyle = centerGrad;
+    ctx.fill();
+    ctx.strokeStyle = '#5c4100';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+
+    if (isSpinning) {
+        wheelAngle += wheelSpeed;
+        wheelAngle %= Math.PI * 2;
+
+        wheelSpeed = Math.max(0.005, wheelSpeed * 0.9968);
+
+        if (lockedCount === 37) {
+            isSpinning = false;
+            spinBtn.disabled = false;
+            statusDiv.textContent = TRANSLATIONS[currentLang].statusDone;
+            updateMascotMessage('mascotDone');
+        }
+        requestAnimationFrame(drawWheel);
+    }
+}
+
+// ==========================================
+// 6. Interactions
+// ==========================================
+function updateLanguageUI(langKey) {
+    currentLang = langKey;
+    const t = TRANSLATIONS[currentLang];
+
+    document.getElementById('appTitle').textContent = t.title;
+    spinBtn.textContent = t.spinBtn;
+    if (!isSpinning) {
+        statusDiv.textContent = t.statusInit;
+    } else {
+        statusDiv.textContent = t.statusSpinning;
+    }
+    updateVisitCountDisplay();
+}
+
+langSelect.addEventListener('change', (e) => {
+    updateLanguageUI(e.target.value);
+});
+
+bgmBtn.addEventListener('click', () => {
+    toggleBGM();
+});
+
+spinBtn.addEventListener('click', () => {
+    if (isSpinning) return;
+
+    initAudio();
+    isSpinning = true;
+    spinBtn.disabled = true;
+
+    wheelSpeed = 0.22;
+
+    statusDiv.textContent = TRANSLATIONS[currentLang].statusSpinning;
+    updateMascotMessage('mascotSpinning');
+
+    const targetIndices = Array.from({length: 37}, (_, i) => i);
+    for (let i = targetIndices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [targetIndices[i], targetIndices[j]] = [targetIndices[j], targetIndices[i]];
+    }
+
+    balls = targetIndices.map((targetIdx, i) => {
+        const delayFrames = i * 12;
+        return new Ball(targetIdx, delayFrames);
+    });
+
+    requestAnimationFrame(drawWheel);
+});
+
+updateLanguageUI('en');
+drawWheel();
+</script>
+
+</body>
+</html>
